@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Estate Playground · The Purposeful Performer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --dark: #000F22;
+    --dark-2: #0A1A2C;
+    --dark-3: #1E2A3C;
+    --gold: #FFD81D;
+    --gold-soft: rgba(255, 216, 29, 0.12);
+    --floral: #F4F0EA;
+    --white: #FFFFFF;
+    --muted: #AAB3BD;
+    --green: #22C55E;
+    --red: #EF4444;
+    --orange: #F59E0B;
+    --purple: #A855F7;
+    --blue: #3B82F6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: 'Open Sans', system-ui, -apple-system, sans-serif;
+    background: var(--dark); color: var(--floral);
+    line-height: 1.6; font-size: 15px;
+  }
+
+  .hero {
+    padding: 44px 32px 36px; text-align: center;
+    background: linear-gradient(135deg, var(--dark) 0%, #0D1F35 55%, var(--dark) 100%);
+    border-bottom: 1px solid var(--dark-3);
+  }
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 44px); font-weight: 800;
+    color: var(--white); letter-spacing: -0.02em; line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .hero h1 .accent { color: var(--gold); }
+  .hero .eyebrow {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 14px;
+  }
+  .hero .subhead {
+    font-size: clamp(14px, 1.6vw, 17px); color: var(--muted);
+    max-width: 820px; margin: 0 auto;
+  }
+
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(0,15,34,0.96); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--dark-3);
+    padding: 10px 16px; display: flex; gap: 6px; overflow-x: auto;
+    scrollbar-width: thin; scrollbar-color: var(--dark-3) transparent;
+  }
+  .nav::-webkit-scrollbar { height: 6px; }
+  .nav::-webkit-scrollbar-thumb { background: var(--dark-3); border-radius: 3px; }
+  .nav button {
+    flex-shrink: 0; padding: 9px 14px; font-family: inherit; font-weight: 700;
+    font-size: 12.5px; color: var(--muted); background: transparent;
+    border: 1px solid transparent; border-radius: 8px; cursor: pointer;
+    white-space: nowrap; transition: all 0.15s ease;
+  }
+  .nav button:hover { color: var(--white); background: var(--dark-2); }
+  .nav button.active {
+    color: var(--dark); background: var(--gold); border-color: var(--gold);
+  }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 28px 20px 40px; }
+
+  section.panel { display: none; animation: fadeIn 0.25s ease; }
+  section.panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .panel-header { margin-bottom: 22px; }
+  .panel-header h2 {
+    font-size: clamp(22px, 3vw, 32px); font-weight: 800; color: var(--white);
+    letter-spacing: -0.015em; line-height: 1.2; margin-bottom: 8px;
+  }
+  .panel-header h2 .accent { color: var(--gold); }
+  .panel-header p { color: var(--muted); font-size: 14.5px; max-width: 820px; }
+
+  .grid { display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
+  .grid.wide-inputs { grid-template-columns: 420px 1fr; }
+  .grid.single { grid-template-columns: 1fr; }
+
+  .card {
+    background: var(--dark-2); border: 1px solid var(--dark-3);
+    border-radius: 12px; padding: 22px;
+  }
+  .card h3 {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 14px;
+  }
+  .card h4 {
+    font-size: 10.5px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; margin: 16px 0 10px;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: var(--floral); margin-bottom: 6px; font-weight: 600;
+  }
+  .field label .val {
+    color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums;
+  }
+  input[type="range"] {
+    width: 100%; -webkit-appearance: none; height: 6px;
+    background: var(--dark-3); border-radius: 3px; outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px;
+    background: var(--gold); border-radius: 50%; cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(255,216,29,0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; background: var(--gold);
+    border-radius: 50%; cursor: pointer; border: none;
+  }
+  input[type="number"], input[type="text"], select {
+    width: 100%; padding: 8px 10px; background: var(--dark);
+    border: 1px solid var(--dark-3); border-radius: 6px;
+    color: var(--white); font-family: inherit; font-size: 13px;
+  }
+
+  .toggle-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .toggle-row button {
+    flex: 1; min-width: 80px; padding: 8px 10px; background: var(--dark-3);
+    color: var(--floral); border: 1px solid var(--dark-3); border-radius: 6px;
+    font-family: inherit; font-weight: 700; font-size: 12px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toggle-row button:hover { border-color: var(--gold); color: var(--white); }
+  .toggle-row button.on {
+    background: var(--gold); color: var(--dark); border-color: var(--gold);
+  }
+
+  .chart-wrap {
+    position: relative; min-height: 320px; background: var(--dark-2);
+    border: 1px solid var(--dark-3); border-radius: 12px; padding: 18px;
+  }
+
+  .metrics {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin-top: 18px;
+  }
+  .metric {
+    background: var(--dark-2); border: 1px solid var(--dark-3);
+    border-radius: 10px; padding: 14px;
+  }
+  .metric .label {
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; margin-bottom: 6px;
+  }
+  .metric .value {
+    font-size: 22px; font-weight: 800; color: var(--white);
+    font-variant-numeric: tabular-nums;
+  }
+  .metric.hero-metric .value { color: var(--gold); font-size: 28px; }
+  .metric.positive .value { color: var(--green); }
+  .metric.negative .value { color: var(--red); }
+  .metric.warning .value { color: var(--orange); }
+
+  .callout {
+    margin-top: 18px; padding: 16px 18px; border-radius: 10px;
+    background: var(--gold-soft); border-left: 3px solid var(--gold);
+    color: var(--floral); font-size: 14px; line-height: 1.6;
+  }
+  .callout.green {
+    background: rgba(34,197,94,0.08); border-left-color: var(--green);
+  }
+  .callout.red {
+    background: rgba(239,68,68,0.08); border-left-color: var(--red);
+  }
+  .callout.orange {
+    background: rgba(245,158,11,0.08); border-left-color: var(--orange);
+  }
+  .callout strong { color: var(--white); }
+
+  .mkt-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  .mkt-table th, .mkt-table td {
+    padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--dark-3);
+  }
+  .mkt-table th {
+    font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); font-weight: 800; background: var(--dark-3);
+  }
+  .mkt-table td { color: var(--floral); }
+  .mkt-table td strong { color: var(--white); }
+  .mkt-table tbody tr:hover { background: rgba(255,216,29,0.03); }
+  .signal-pill {
+    display: inline-block; padding: 3px 9px; border-radius: 10px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .signal-pill.rent { background: rgba(34,197,94,0.15); color: var(--green); }
+  .signal-pill.toss { background: rgba(245,158,11,0.15); color: var(--orange); }
+  .signal-pill.buy { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+  /* Twin */
+  .twin-wrap {
+    display: grid; grid-template-columns: 320px 1fr; gap: 24px;
+    background: var(--dark-2); border: 1px solid var(--dark-3);
+    border-radius: 14px; padding: 24px;
+  }
+  .twin-intro { padding: 10px 0; }
+  .twin-avatar {
+    width: 120px; height: 120px; border-radius: 50%; overflow: hidden;
+    border: 2px solid var(--gold); margin-bottom: 16px;
+  }
+  .twin-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .twin-intro h3 {
+    font-size: 17px; color: var(--white); font-weight: 800;
+    margin-bottom: 10px; letter-spacing: -0.01em;
+  }
+  .twin-intro p { font-size: 13.5px; color: var(--muted); margin-bottom: 12px; }
+  .twin-intro .scope-note {
+    background: var(--gold-soft); border-left: 3px solid var(--gold);
+    padding: 10px 12px; border-radius: 6px; margin-top: 12px;
+    font-size: 12.5px; color: var(--floral);
+  }
+  .twin-intro .scope-note strong { color: var(--gold); }
+
+  .chat-card {
+    background: var(--dark); border: 1px solid var(--dark-3);
+    border-radius: 10px; display: flex; flex-direction: column;
+    min-height: 500px;
+  }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 18px; max-height: 420px;
+  }
+  .msg {
+    padding: 12px 14px; border-radius: 10px; margin-bottom: 10px;
+    font-size: 14px; line-height: 1.6;
+  }
+  .msg.twin {
+    background: var(--dark-2); border-left: 3px solid var(--gold);
+    color: var(--floral);
+  }
+  .msg.twin strong { color: var(--white); }
+  .msg.user {
+    background: var(--dark-3); border-right: 3px solid var(--floral);
+    color: var(--white); margin-left: 40px; text-align: right;
+  }
+  .msg .msg-meta {
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); font-weight: 800; margin-bottom: 6px;
+  }
+  .suggested {
+    padding: 14px 18px; border-top: 1px solid var(--dark-3);
+    display: flex; flex-wrap: wrap; gap: 8px; background: rgba(0,0,0,0.2);
+  }
+  .suggested button {
+    padding: 7px 12px; background: var(--dark-3); border: 1px solid transparent;
+    color: var(--floral); border-radius: 6px; font-family: inherit;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  }
+  .suggested button:hover {
+    background: var(--gold-soft); border-color: var(--gold); color: var(--white);
+  }
+  .claude-cta {
+    padding: 14px 18px; display: flex; align-items: center;
+    justify-content: space-between; background: linear-gradient(90deg, rgba(255,216,29,0.05) 0%, transparent 100%);
+    border-top: 1px solid var(--dark-3); gap: 14px; flex-wrap: wrap;
+  }
+  .claude-cta .txt { font-size: 12.5px; color: var(--floral); flex: 1; }
+  .claude-cta .txt strong { color: var(--white); }
+  .claude-cta a {
+    padding: 8px 14px; background: var(--gold); color: var(--dark);
+    font-weight: 800; font-size: 12px; border-radius: 6px;
+    text-decoration: none; text-transform: uppercase; letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .chat-input {
+    display: flex; padding: 14px 18px; border-top: 1px solid var(--dark-3); gap: 10px;
+  }
+  .chat-input input {
+    flex: 1; padding: 10px 14px; background: var(--dark-2);
+    border: 1px solid var(--dark-3); border-radius: 8px;
+    color: var(--white); font-family: inherit; font-size: 13.5px; outline: none;
+  }
+  .chat-input input:focus { border-color: var(--gold); }
+  .chat-input button {
+    padding: 10px 18px; background: var(--gold); color: var(--dark);
+    font-family: inherit; font-weight: 800; font-size: 12px;
+    border: none; border-radius: 8px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .decision-tree { display: grid; gap: 14px; }
+  .dt-node {
+    padding: 20px; border-radius: 12px; background: var(--dark-2);
+    border: 1px solid var(--dark-3); position: relative;
+  }
+  .dt-node.start { border-left: 4px solid var(--gold); }
+  .dt-node.path { border-left: 4px solid var(--blue); }
+  .dt-node.decision { border-left: 4px solid var(--orange); }
+  .dt-node.leaf { border-left: 4px solid var(--green); }
+  .dt-node .dt-label {
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); font-weight: 800; margin-bottom: 6px;
+  }
+  .dt-node h4 {
+    font-size: 16px; color: var(--white); font-weight: 800;
+    margin-bottom: 8px; text-transform: none; letter-spacing: 0;
+  }
+  .dt-node p { font-size: 13.5px; color: var(--floral); margin-bottom: 10px; }
+  .dt-options {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
+  }
+  .dt-btn {
+    padding: 10px 14px; background: var(--dark-3); border: 1px solid var(--dark-3);
+    color: var(--floral); font-family: inherit; font-weight: 700; font-size: 12.5px;
+    border-radius: 8px; cursor: pointer; transition: all 0.15s; text-align: left;
+  }
+  .dt-btn:hover { border-color: var(--gold); color: var(--white); background: var(--gold-soft); }
+
+  footer {
+    margin-top: 40px; padding: 24px; text-align: center;
+    background: var(--dark-2); border-top: 1px solid var(--dark-3);
+    font-size: 11px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  footer strong { color: var(--gold); }
+
+  .disclaimer {
+    margin-top: 24px; padding: 16px 20px; background: var(--dark-2);
+    border: 1px solid var(--dark-3); border-radius: 10px;
+    font-size: 12px; color: var(--muted); line-height: 1.7;
+  }
+  .disclaimer strong { color: var(--floral); }
+
+  @media (max-width: 900px) {
+    .grid, .grid.wide-inputs { grid-template-columns: 1fr; gap: 16px; }
+    .twin-wrap { grid-template-columns: 1fr; }
+    .twin-avatar { width: 80px; height: 80px; }
+  }
+  @media (max-width: 700px) {
+    .mkt-table { font-size: 11.5px; }
+    .mkt-table th, .mkt-table td { padding: 8px 6px; }
+  }
+  @media (max-width: 640px) {
+    .hero { padding: 28px 18px 22px; }
+    main { padding: 20px 14px 32px; }
+    .card { padding: 16px; }
+    .chart-wrap { padding: 12px; min-height: 280px; }
+  }
+  @media (max-width: 400px) {
+    .metric .value { font-size: 18px; }
+    .metric.hero-metric .value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">Learning Path 5 · Lesson 7 Companion</div>
+  <h1>The <span class="accent">Real Estate</span> Playground</h1>
+  <p class="subhead">Eight tools to replace assumption with arithmetic on the biggest financial decision most strategic sellers will face. Own, rent, or leverage — let the numbers decide.</p>
+</div>
+
+<nav class="nav" id="nav">
+  <button class="active" data-target="s-rvb">🏠 Rent vs. Buy</button>
+  <button data-target="s-tco">💰 True Cost</button>
+  <button data-target="s-opp">📊 Opportunity Cost</button>
+  <button data-target="s-lock">🔄 Lock-In Calculator</button>
+  <button data-target="s-mkt">🗺️ Market Comparison</button>
+  <button data-target="s-lev">📈 Leverage Analyzer</button>
+  <button data-target="s-screen">🏗️ Property Screener</button>
+  <button data-target="s-twin">🎙 Ask the AI Twin</button>
+</nav>
+
+<main>
+
+<!-- ==================== RENT VS. BUY CALCULATOR ==================== -->
+<section id="s-rvb" class="panel active">
+  <div class="panel-header">
+    <h2>Rent vs. Buy Calculator: <span class="accent">When does buying actually win?</span></h2>
+    <p>The breakeven year is the point at which buying catches up to renting and investing the difference. Move the sliders to your actual numbers. If the breakeven lands past your likely hold period, the math favors renting.</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Your Inputs</h3>
+      <div class="field">
+        <label>Monthly rent <span class="val" id="rvb-rent-v">$2,800</span></label>
+        <input type="range" id="rvb-rent" min="500" max="8000" step="100" value="2800" />
+      </div>
+      <div class="field">
+        <label>Home purchase price <span class="val" id="rvb-price-v">$650,000</span></label>
+        <input type="range" id="rvb-price" min="100000" max="3000000" step="10000" value="650000" />
+      </div>
+      <div class="field">
+        <label>Down payment <span class="val" id="rvb-down-v">20%</span></label>
+        <input type="range" id="rvb-down" min="3" max="50" step="1" value="20" />
+      </div>
+      <div class="field">
+        <label>Mortgage rate <span class="val" id="rvb-rate-v">6.8%</span></label>
+        <input type="range" id="rvb-rate" min="2" max="10" step="0.1" value="6.8" />
+      </div>
+      <div class="field">
+        <label>Property tax rate <span class="val" id="rvb-tax-v">1.1%</span></label>
+        <input type="range" id="rvb-tax" min="0.2" max="3" step="0.1" value="1.1" />
+      </div>
+      <div class="field">
+        <label>Annual insurance <span class="val" id="rvb-ins-v">$2,400</span></label>
+        <input type="range" id="rvb-ins" min="600" max="8000" step="100" value="2400" />
+      </div>
+      <div class="field">
+        <label>Annual maintenance (% of value) <span class="val" id="rvb-maint-v">1.0%</span></label>
+        <input type="range" id="rvb-maint" min="0.5" max="3" step="0.1" value="1.0" />
+      </div>
+      <div class="field">
+        <label>Home appreciation <span class="val" id="rvb-appr-v">3.5%</span></label>
+        <input type="range" id="rvb-appr" min="0" max="8" step="0.5" value="3.5" />
+      </div>
+      <div class="field">
+        <label>Investment return <span class="val" id="rvb-inv-v">8.0%</span></label>
+        <input type="range" id="rvb-inv" min="2" max="14" step="0.5" value="8" />
+      </div>
+      <div class="field">
+        <label>Rent growth / year <span class="val" id="rvb-rg-v">3.0%</span></label>
+        <input type="range" id="rvb-rg" min="0" max="8" step="0.5" value="3" />
+      </div>
+    </div>
+    <div>
+      <div class="metrics">
+        <div class="metric hero-metric">
+          <div class="label">Breakeven Year</div>
+          <div class="value" id="rvb-be">—</div>
+        </div>
+        <div class="metric" id="rvb-mo-buy-m">
+          <div class="label">Monthly cost (buy)</div>
+          <div class="value" id="rvb-mo-buy">—</div>
+        </div>
+        <div class="metric" id="rvb-mo-rent-m">
+          <div class="label">Monthly cost (rent yr 1)</div>
+          <div class="value" id="rvb-mo-rent">—</div>
+        </div>
+        <div class="metric" id="rvb-delta-m">
+          <div class="label">Monthly delta</div>
+          <div class="value" id="rvb-delta">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="margin-top:18px;"><canvas id="rvb-chart"></canvas></div>
+      <div class="callout" id="rvb-callout"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TRUE COST OF OWNERSHIP ==================== -->
+<section id="s-tco" class="panel">
+  <div class="panel-header">
+    <h2>True Cost of Ownership: <span class="accent">The iceberg under the sticker price</span></h2>
+    <p>The purchase price is what everyone fixates on. The number that matters is the total spend over your hold period. Watch the iceberg grow.</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Your Inputs</h3>
+      <div class="field">
+        <label>Purchase price <span class="val" id="tco-price-v">$650,000</span></label>
+        <input type="range" id="tco-price" min="100000" max="3000000" step="10000" value="650000" />
+      </div>
+      <div class="field">
+        <label>Down payment <span class="val" id="tco-down-v">20%</span></label>
+        <input type="range" id="tco-down" min="3" max="50" step="1" value="20" />
+      </div>
+      <div class="field">
+        <label>Mortgage rate <span class="val" id="tco-rate-v">6.8%</span></label>
+        <input type="range" id="tco-rate" min="2" max="10" step="0.1" value="6.8" />
+      </div>
+      <div class="field">
+        <label>Hold period (years) <span class="val" id="tco-hold-v">10</span></label>
+        <input type="range" id="tco-hold" min="1" max="30" step="1" value="10" />
+      </div>
+      <div class="field">
+        <label>Property tax rate <span class="val" id="tco-tax-v">1.1%</span></label>
+        <input type="range" id="tco-tax" min="0.2" max="3" step="0.1" value="1.1" />
+      </div>
+      <div class="field">
+        <label>Annual insurance <span class="val" id="tco-ins-v">$2,400</span></label>
+        <input type="range" id="tco-ins" min="600" max="8000" step="100" value="2400" />
+      </div>
+      <div class="field">
+        <label>Maintenance (% of value/yr) <span class="val" id="tco-maint-v">1.0%</span></label>
+        <input type="range" id="tco-maint" min="0.5" max="3" step="0.1" value="1.0" />
+      </div>
+      <div class="field">
+        <label>Selling costs (agent + closing) <span class="val" id="tco-sell-v">6.0%</span></label>
+        <input type="range" id="tco-sell" min="2" max="10" step="0.5" value="6" />
+      </div>
+    </div>
+    <div>
+      <div class="metrics">
+        <div class="metric hero-metric">
+          <div class="label">Total cost of ownership</div>
+          <div class="value" id="tco-total">—</div>
+        </div>
+        <div class="metric negative">
+          <div class="label">Cost vs. sticker price</div>
+          <div class="value" id="tco-mult">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="margin-top:18px;"><canvas id="tco-chart"></canvas></div>
+      <div class="callout" id="tco-callout"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== OPPORTUNITY COST ANALYZER ==================== -->
+<section id="s-opp" class="panel">
+  <div class="panel-header">
+    <h2>Opportunity Cost Analyzer: <span class="accent">Two paths, one chart</span></h2>
+    <p>Path A buys the home. Path B rents and invests the down payment plus the monthly savings. Watch both lines over time and see which path builds more net worth under your assumptions.</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Your Inputs</h3>
+      <div class="field">
+        <label>Down payment amount <span class="val" id="opp-dp-v">$130,000</span></label>
+        <input type="range" id="opp-dp" min="10000" max="1000000" step="5000" value="130000" />
+      </div>
+      <div class="field">
+        <label>Monthly mortgage (PITI) <span class="val" id="opp-mort-v">$4,200</span></label>
+        <input type="range" id="opp-mort" min="500" max="15000" step="100" value="4200" />
+      </div>
+      <div class="field">
+        <label>Monthly rent <span class="val" id="opp-rent-v">$2,800</span></label>
+        <input type="range" id="opp-rent" min="500" max="8000" step="100" value="2800" />
+      </div>
+      <div class="field">
+        <label>Home appreciation <span class="val" id="opp-appr-v">3.5%</span></label>
+        <input type="range" id="opp-appr" min="0" max="8" step="0.5" value="3.5" />
+      </div>
+      <div class="field">
+        <label>Investment return <span class="val" id="opp-inv-v">8.0%</span></label>
+        <input type="range" id="opp-inv" min="2" max="14" step="0.5" value="8" />
+      </div>
+      <div class="field">
+        <label>Rent growth / year <span class="val" id="opp-rg-v">3.0%</span></label>
+        <input type="range" id="opp-rg" min="0" max="8" step="0.5" value="3" />
+      </div>
+      <div class="field">
+        <label>Home price <span class="val" id="opp-hp-v">$650,000</span></label>
+        <input type="range" id="opp-hp" min="100000" max="3000000" step="10000" value="650000" />
+      </div>
+    </div>
+    <div>
+      <div class="metrics">
+        <div class="metric positive">
+          <div class="label">Renter net worth @ 10yr</div>
+          <div class="value" id="opp-rent-nw">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Buyer net worth @ 10yr</div>
+          <div class="value" id="opp-buy-nw">—</div>
+        </div>
+        <div class="metric hero-metric">
+          <div class="label">Advantage</div>
+          <div class="value" id="opp-adv">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="margin-top:18px;"><canvas id="opp-chart"></canvas></div>
+      <div class="callout" id="opp-callout"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LOCK-IN CALCULATOR ==================== -->
+<section id="s-lock" class="panel">
+  <div class="panel-header">
+    <h2>Lock-In Calculator: <span class="accent">What does moving actually cost?</span></h2>
+    <p>If you're sitting on a sub-4% mortgage and considering a move, this is the number that matters. See the monthly, annual, and cumulative cost of trading your existing rate for today's rate.</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Your Current Mortgage</h3>
+      <div class="field">
+        <label>Current rate <span class="val" id="lock-cur-v">3.2%</span></label>
+        <input type="range" id="lock-cur" min="2" max="7" step="0.1" value="3.2" />
+      </div>
+      <div class="field">
+        <label>Current loan balance <span class="val" id="lock-bal-v">$450,000</span></label>
+        <input type="range" id="lock-bal" min="50000" max="2000000" step="10000" value="450000" />
+      </div>
+      <div class="field">
+        <label>Remaining term (years) <span class="val" id="lock-rem-v">26</span></label>
+        <input type="range" id="lock-rem" min="5" max="30" step="1" value="26" />
+      </div>
+      <h3 style="margin-top:20px;">New Mortgage</h3>
+      <div class="field">
+        <label>New rate <span class="val" id="lock-new-v">6.8%</span></label>
+        <input type="range" id="lock-new" min="4" max="10" step="0.1" value="6.8" />
+      </div>
+      <div class="field">
+        <label>New loan amount <span class="val" id="lock-amt-v">$500,000</span></label>
+        <input type="range" id="lock-amt" min="50000" max="2000000" step="10000" value="500000" />
+      </div>
+      <div class="field">
+        <label>New term (years) <span class="val" id="lock-term-v">30</span></label>
+        <input type="range" id="lock-term" min="10" max="30" step="1" value="30" />
+      </div>
+    </div>
+    <div>
+      <div class="metrics">
+        <div class="metric hero-metric">
+          <div class="label">Monthly cost increase</div>
+          <div class="value" id="lock-mo">—</div>
+        </div>
+        <div class="metric negative">
+          <div class="label">Annual cost increase</div>
+          <div class="value" id="lock-yr">—</div>
+        </div>
+        <div class="metric warning">
+          <div class="label">5-year cumulative cost</div>
+          <div class="value" id="lock-5yr">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="margin-top:18px;"><canvas id="lock-chart"></canvas></div>
+      <div class="callout" id="lock-callout"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MARKET COMPARISON TOOL ==================== -->
+<section id="s-mkt" class="panel">
+  <div class="panel-header">
+    <h2>Market Comparison: <span class="accent">Twenty metros where strategic sellers cluster</span></h2>
+    <p>National averages are useless for your specific decision. The price-to-rent ratio tells you whether buying or renting is cheaper on a monthly basis in your metro. Above 20 favors renting. Below 15 favors buying. Between 15 and 20, the answer depends on hold period.</p>
+  </div>
+  <div class="card">
+    <div style="overflow-x:auto;">
+      <table class="mkt-table" id="mkt-table">
+        <thead>
+          <tr>
+            <th>Metro</th>
+            <th>Median Home Price</th>
+            <th>Median Rent (Mo)</th>
+            <th>Price-to-Rent Ratio</th>
+            <th>Signal</th>
+          </tr>
+        </thead>
+        <tbody id="mkt-body"></tbody>
+      </table>
+    </div>
+    <div class="callout" style="margin-top:18px;">
+      <strong>How to read this:</strong> The price-to-rent ratio divides the median home price by the annual rent. A ratio of 20 means the home costs 20 years of rent. Higher ratios mean buying is relatively more expensive. Data is illustrative and based on publicly available metro-level estimates — always verify with local market research before making decisions.
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LEVERAGE ANALYZER ==================== -->
+<section id="s-lev" class="panel">
+  <div class="panel-header">
+    <h2>Leverage Analyzer: <span class="accent">Does the investment property math work?</span></h2>
+    <p>Model a rental property as a capital allocation. See the cash-on-cash return, leveraged ROI, and compare to putting the same capital in the market unleveraged.</p>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Property Inputs</h3>
+      <div class="field">
+        <label>Purchase price <span class="val" id="lev-price-v">$400,000</span></label>
+        <input type="range" id="lev-price" min="100000" max="2000000" step="10000" value="400000" />
+      </div>
+      <div class="field">
+        <label>Down payment <span class="val" id="lev-down-v">25%</span></label>
+        <input type="range" id="lev-down" min="10" max="50" step="1" value="25" />
+      </div>
+      <div class="field">
+        <label>Mortgage rate <span class="val" id="lev-rate-v">7.2%</span></label>
+        <input type="range" id="lev-rate" min="3" max="10" step="0.1" value="7.2" />
+      </div>
+      <div class="field">
+        <label>Monthly rental income <span class="val" id="lev-income-v">$2,800</span></label>
+        <input type="range" id="lev-income" min="500" max="10000" step="100" value="2800" />
+      </div>
+      <div class="field">
+        <label>Annual expenses (% of rent) <span class="val" id="lev-exp-v">40%</span></label>
+        <input type="range" id="lev-exp" min="20" max="70" step="5" value="40" />
+      </div>
+      <div class="field">
+        <label>Appreciation / yr <span class="val" id="lev-appr-v">3.5%</span></label>
+        <input type="range" id="lev-appr" min="0" max="8" step="0.5" value="3.5" />
+      </div>
+      <div class="field">
+        <label>Hold period (years) <span class="val" id="lev-hold-v">10</span></label>
+        <input type="range" id="lev-hold" min="3" max="30" step="1" value="10" />
+      </div>
+      <div class="field">
+        <label>Market return (comparison) <span class="val" id="lev-mkt-v">8.0%</span></label>
+        <input type="range" id="lev-mkt" min="2" max="14" step="0.5" value="8" />
+      </div>
+    </div>
+    <div>
+      <div class="metrics">
+        <div class="metric hero-metric">
+          <div class="label">Cash-on-cash return</div>
+          <div class="value" id="lev-coc">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Leveraged total ROI</div>
+          <div class="value" id="lev-roi">—</div>
+        </div>
+        <div class="metric positive">
+          <div class="label">Market alternative</div>
+          <div class="value" id="lev-alt">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Monthly cash flow</div>
+          <div class="value" id="lev-cf">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="margin-top:18px;"><canvas id="lev-chart"></canvas></div>
+      <div class="callout" id="lev-callout"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== INVESTMENT PROPERTY SCREENER ==================== -->
+<section id="s-screen" class="panel">
+  <div class="panel-header">
+    <h2>Investment Property Screener: <span class="accent">Should you buy a rental?</span></h2>
+    <p>Walk through the decision tree. Answer honestly and see whether an investment property belongs in your financial architecture right now.</p>
+  </div>
+  <div class="card">
+    <div class="decision-tree" id="dt-container"></div>
+    <div style="margin-top:16px;text-align:center;">
+      <button onclick="dtPath=['start'];renderDT();sendHeight();" style="padding:8px 16px;background:var(--dark-3);color:var(--floral);border:1px solid var(--dark-3);border-radius:6px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">↻ Restart</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ASK THE AI TWIN ==================== -->
+<section id="s-twin" class="panel">
+  <div class="panel-header">
+    <h2>Ask the AI Twin: <span class="accent">Your real estate questions, answered</span></h2>
+    <p>Ask anything covered in this lesson. The Twin answers from Lesson 7 content. Questions outside that scope get handed off to Claude with the lesson context pre-loaded.</p>
+  </div>
+  <div class="twin-wrap">
+    <div class="twin-intro">
+      <div class="twin-avatar"><img id="twin-avatar-img" alt="Brandon" /></div>
+      <h3>Brandon's AI Twin</h3>
+      <p>Trained on Lesson 7: Own, Rent, or Leverage — the real estate decision framework for strategic tech sellers earning $200K–$500K+.</p>
+      <p>Ask about rent vs. buy math, true cost of ownership, opportunity cost, lock-in effects, price-to-rent ratios, investment property analysis, and the decision framework.</p>
+      <div class="scope-note">
+        <strong>Scope:</strong> This Twin is scoped to Lesson 7 only. For questions outside this topic, it will hand you off to Claude with the lesson context pre-loaded.
+      </div>
+    </div>
+    <div class="chat-card">
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg twin">
+          <div class="msg-meta">AI TWIN</div>
+          Welcome to the Real Estate Playground. Ask me anything about the rent-vs-buy decision, true cost of ownership, opportunity cost analysis, the lock-in effect, or how real estate fits into your financial architecture as a strategic tech seller.
+        </div>
+      </div>
+      <div class="suggested" id="suggested">
+        <button>Should I buy or rent right now?</button>
+        <button>What's the true cost of owning a home?</button>
+        <button>How does the lock-in effect work?</button>
+        <button>When does buying beat renting?</button>
+        <button>Should I buy a rental property?</button>
+        <button>What's a price-to-rent ratio?</button>
+      </div>
+      <div class="claude-cta">
+        <div class="txt"><strong>Need a deeper answer?</strong> The Twin covers Lesson 7. For anything outside that scope, Claude picks up with the full lesson context.</div>
+        <a href="https://claude.ai/new" target="_blank" rel="noopener">Ask Claude →</a>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chat-input" placeholder="Ask about real estate strategy..." />
+        <button id="chat-send">Send</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="disclaimer">
+  <strong>Disclaimer:</strong> This playground is for educational purposes only. It is not financial, tax, investment, or legal advice. The calculations use simplified models and illustrative assumptions that may not reflect your actual situation. Consult a qualified financial advisor, tax professional, or attorney before making real estate or investment decisions. Past performance and model outputs do not guarantee future results.
+</div>
+
+</main>
+
+<footer>
+  <strong>The Purposeful Performer</strong> · Learning Path 5 · Lesson 7 Companion
+</footer>
+
+<script>
+// ==================== UTILITIES ====================
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+const fmtK = n => n >= 1e6 ? '$' + (n/1e6).toFixed(1) + 'M' : n >= 1e3 ? '$' + (n/1e3).toFixed(0) + 'K' : fmt(n);
+const pct = (n, d=1) => n.toFixed(d) + '%';
+
+function sendHeight(){
+  try { window.parent.postMessage({ type:'resize', height: document.documentElement.scrollHeight }, '*'); } catch(e){}
+}
+
+// Chart.js defaults
+Chart.defaults.color = '#AAB3BD';
+Chart.defaults.borderColor = '#1E2A3C';
+Chart.defaults.font.family = "'Open Sans', system-ui, sans-serif";
+
+// ==================== TAB SWITCHING ====================
+document.querySelectorAll('.nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+    const target = $(btn.dataset.target);
+    if (target) target.classList.add('active');
+    sendHeight();
+  });
+});
+
+// ==================== MORTGAGE MATH ====================
+function mortgagePayment(principal, annualRate, years) {
+  const r = annualRate / 12;
+  const n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * (r * Math.pow(1+r, n)) / (Math.pow(1+r, n) - 1);
+}
+
+// ==================== 1. RENT VS. BUY ====================
+let rvbChart = null;
+function calcRVB() {
+  const rent = +$('rvb-rent').value;
+  const price = +$('rvb-price').value;
+  const downPct = +$('rvb-down').value / 100;
+  const rate = +$('rvb-rate').value / 100;
+  const taxRate = +$('rvb-tax').value / 100;
+  const ins = +$('rvb-ins').value;
+  const maintPct = +$('rvb-maint').value / 100;
+  const appr = +$('rvb-appr').value / 100;
+  const inv = +$('rvb-inv').value / 100;
+  const rentGrowth = +$('rvb-rg').value / 100;
+
+  const dp = price * downPct;
+  const loan = price - dp;
+  const mp = mortgagePayment(loan, rate, 30);
+  const moTax = (price * taxRate) / 12;
+  const moIns = ins / 12;
+  const moMaint = (price * maintPct) / 12;
+  const totalMoBuy = mp + moTax + moIns + moMaint;
+  const moRent = rent;
+  const delta = totalMoBuy - moRent;
+
+  // Update displays
+  $('rvb-rent-v').textContent = fmt(rent);
+  $('rvb-price-v').textContent = fmt(price);
+  $('rvb-down-v').textContent = pct(downPct*100,0);
+  $('rvb-rate-v').textContent = pct(rate*100);
+  $('rvb-tax-v').textContent = pct(taxRate*100);
+  $('rvb-ins-v').textContent = fmt(ins);
+  $('rvb-maint-v').textContent = pct(maintPct*100);
+  $('rvb-appr-v').textContent = pct(appr*100);
+  $('rvb-inv-v').textContent = pct(inv*100);
+  $('rvb-rg-v').textContent = pct(rentGrowth*100);
+
+  $('rvb-mo-buy').textContent = fmt(totalMoBuy);
+  $('rvb-mo-rent').textContent = fmt(moRent);
+  $('rvb-delta').textContent = (delta > 0 ? '+' : '') + fmt(delta);
+  $('rvb-delta-m').className = 'metric ' + (delta > 0 ? 'negative' : 'positive');
+
+  // Simulate 30 years
+  const years = 30;
+  const buyNW = [], rentNW = [], labels = [];
+  let renterPortfolio = dp; // invest the down payment
+  let curRent = rent;
+  let homeVal = price;
+  let loanBal = loan;
+  const moRate = rate / 12;
+
+  for (let y = 1; y <= years; y++) {
+    labels.push('Year ' + y);
+    // Buyer: home appreciates, pay down loan
+    homeVal *= (1 + appr);
+    let intPaid = 0, princPaid = 0;
+    for (let m = 0; m < 12; m++) {
+      const intThisMonth = loanBal * moRate;
+      const princThisMonth = mp - intThisMonth;
+      loanBal = Math.max(0, loanBal - princThisMonth);
+      intPaid += intThisMonth;
+      princPaid += princThisMonth;
+    }
+    const buyerEquity = homeVal - loanBal;
+    buyNW.push(buyerEquity);
+
+    // Renter: invest delta each month + grow portfolio
+    for (let m = 0; m < 12; m++) {
+      const moSave = totalMoBuy - curRent;
+      if (moSave > 0) renterPortfolio += moSave;
+      renterPortfolio *= (1 + inv/12);
+    }
+    curRent *= (1 + rentGrowth);
+    rentNW.push(renterPortfolio);
+  }
+
+  // Find breakeven
+  let beYear = 'Never';
+  for (let i = 0; i < years; i++) {
+    if (buyNW[i] >= rentNW[i]) { beYear = 'Year ' + (i+1); break; }
+  }
+  $('rvb-be').textContent = beYear;
+
+  // Callout
+  if (beYear === 'Never') {
+    $('rvb-callout').className = 'callout red';
+    $('rvb-callout').innerHTML = '<strong>Renting wins at these assumptions.</strong> The breakeven never arrives within 30 years. At current rates and appreciation, renting and investing the difference builds more net worth.';
+  } else {
+    const yr = parseInt(beYear.split(' ')[1]);
+    const cls = yr <= 7 ? 'green' : yr <= 12 ? 'orange' : 'red';
+    $('rvb-callout').className = 'callout ' + cls;
+    $('rvb-callout').innerHTML = `<strong>Breakeven at ${beYear}.</strong> ` +
+      (yr <= 7 ? 'Buying pencils out within a reasonable hold period. If you plan to stay 7+ years, the math supports buying.' :
+       yr <= 12 ? 'The breakeven is in the gray zone. Buying works if you can commit to a long hold, but a shorter stay favors renting.' :
+       'The breakeven is deep into the second decade. Unless you are certain you will hold 12+ years, renting and investing is likely the better financial path.');
+  }
+
+  // Chart
+  if (rvbChart) rvbChart.destroy();
+  rvbChart = new Chart($('rvb-chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Buyer Net Worth (Equity)', data: buyNW, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, pointRadius: 0 },
+        { label: 'Renter Net Worth (Portfolio)', data: rentNW, borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { weight: 700, size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.raw) } } },
+      scales: {
+        y: { ticks: { callback: v => fmtK(v) }, grid: { color: '#1E2A3C' } },
+        x: { ticks: { maxTicksLimit: 10 }, grid: { display: false } }
+      }
+    }
+  });
+  sendHeight();
+}
+
+// Bind RVB sliders
+['rvb-rent','rvb-price','rvb-down','rvb-rate','rvb-tax','rvb-ins','rvb-maint','rvb-appr','rvb-inv','rvb-rg'].forEach(id => {
+  $(id).addEventListener('input', calcRVB);
+});
+calcRVB();
+
+// ==================== 2. TRUE COST OF OWNERSHIP ====================
+let tcoChart = null;
+function calcTCO() {
+  const price = +$('tco-price').value;
+  const downPct = +$('tco-down').value / 100;
+  const rate = +$('tco-rate').value / 100;
+  const hold = +$('tco-hold').value;
+  const taxRate = +$('tco-tax').value / 100;
+  const ins = +$('tco-ins').value;
+  const maintPct = +$('tco-maint').value / 100;
+  const sellPct = +$('tco-sell').value / 100;
+
+  $('tco-price-v').textContent = fmt(price);
+  $('tco-down-v').textContent = pct(downPct*100,0);
+  $('tco-rate-v').textContent = pct(rate*100);
+  $('tco-hold-v').textContent = hold;
+  $('tco-tax-v').textContent = pct(taxRate*100);
+  $('tco-ins-v').textContent = fmt(ins);
+  $('tco-maint-v').textContent = pct(maintPct*100);
+  $('tco-sell-v').textContent = pct(sellPct*100);
+
+  const dp = price * downPct;
+  const loan = price - dp;
+  const mp = mortgagePayment(loan, rate, 30);
+  const moRate = rate / 12;
+
+  let totalInterest = 0, bal = loan;
+  for (let m = 0; m < hold * 12; m++) {
+    const intM = bal * moRate;
+    totalInterest += intM;
+    bal = Math.max(0, bal - (mp - intM));
+  }
+
+  const totalTax = price * taxRate * hold;
+  const totalIns = ins * hold;
+  const totalMaint = price * maintPct * hold;
+  const closingBuy = price * 0.025; // ~2.5% buying costs
+  const closingSell = price * sellPct;
+  const total = dp + totalInterest + (mp * hold * 12 - totalInterest) + totalTax + totalIns + totalMaint + closingBuy + closingSell;
+  // Simpler: total = dp + mortgage payments + taxes + ins + maint + closing costs
+  const totalPayments = mp * hold * 12;
+  const totalAll = dp + totalPayments + totalTax + totalIns + totalMaint + closingBuy + closingSell;
+
+  $('tco-total').textContent = fmt(totalAll);
+  const mult = (totalAll / price).toFixed(1);
+  $('tco-mult').textContent = mult + 'x';
+
+  $('tco-callout').className = 'callout';
+  $('tco-callout').innerHTML = `<strong>Over ${hold} years, total cost is ${fmt(totalAll)}</strong> — that's <strong>${mult}x</strong> the sticker price of ${fmt(price)}. The "hidden" costs (interest, taxes, insurance, maintenance, and transaction fees) add up to ${fmt(totalAll - price)}.`;
+
+  // Stacked bar
+  const segments = [
+    { label: 'Down Payment', value: dp, color: '#3B82F6' },
+    { label: 'Mortgage Interest', value: totalInterest, color: '#EF4444' },
+    { label: 'Principal Payments', value: totalPayments - totalInterest, color: '#A855F7' },
+    { label: 'Property Taxes', value: totalTax, color: '#F59E0B' },
+    { label: 'Insurance', value: totalIns, color: '#22C55E' },
+    { label: 'Maintenance', value: totalMaint, color: '#6366F1' },
+    { label: 'Transaction Costs', value: closingBuy + closingSell, color: '#EC4899' }
+  ];
+
+  if (tcoChart) tcoChart.destroy();
+  tcoChart = new Chart($('tco-chart'), {
+    type: 'bar',
+    data: {
+      labels: ['Total Cost of Ownership'],
+      datasets: segments.map(s => ({
+        label: s.label, data: [s.value], backgroundColor: s.color, borderRadius: 4
+      }))
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11, weight: 700 }, boxWidth: 14 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.raw) } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { callback: v => fmtK(v) }, grid: { color: '#1E2A3C' } },
+        y: { stacked: true, display: false }
+      }
+    }
+  });
+  sendHeight();
+}
+
+['tco-price','tco-down','tco-rate','tco-hold','tco-tax','tco-ins','tco-maint','tco-sell'].forEach(id => {
+  $(id).addEventListener('input', calcTCO);
+});
+calcTCO();
+
+// ==================== 3. OPPORTUNITY COST ANALYZER ====================
+let oppChart = null;
+function calcOpp() {
+  const dp = +$('opp-dp').value;
+  const mort = +$('opp-mort').value;
+  const rent = +$('opp-rent').value;
+  const appr = +$('opp-appr').value / 100;
+  const inv = +$('opp-inv').value / 100;
+  const rentGrowth = +$('opp-rg').value / 100;
+  const homePrice = +$('opp-hp').value;
+
+  $('opp-dp-v').textContent = fmt(dp);
+  $('opp-mort-v').textContent = fmt(mort);
+  $('opp-rent-v').textContent = fmt(rent);
+  $('opp-appr-v').textContent = pct(appr*100);
+  $('opp-inv-v').textContent = pct(inv*100);
+  $('opp-rg-v').textContent = pct(rentGrowth*100);
+  $('opp-hp-v').textContent = fmt(homePrice);
+
+  const years = 30;
+  const labels = [], buyLine = [], rentLine = [];
+  let renterPort = dp;
+  let curRent = rent;
+  let homeVal = homePrice;
+
+  for (let y = 1; y <= years; y++) {
+    labels.push('Year ' + y);
+    homeVal *= (1 + appr);
+    buyLine.push(homeVal - homePrice * 0.8); // rough equity assuming 20% down on home price
+
+    for (let m = 0; m < 12; m++) {
+      const savings = mort - curRent;
+      if (savings > 0) renterPort += savings;
+      renterPort *= (1 + inv/12);
+    }
+    curRent *= (1 + rentGrowth);
+    rentLine.push(renterPort);
+  }
+
+  const rentNW10 = rentLine[9] || 0;
+  const buyNW10 = buyLine[9] || 0;
+  $('opp-rent-nw').textContent = fmt(rentNW10);
+  $('opp-buy-nw').textContent = fmt(buyNW10);
+  const adv = rentNW10 - buyNW10;
+  $('opp-adv').textContent = (adv > 0 ? 'Renter +' : 'Buyer +') + fmt(Math.abs(adv));
+
+  $('opp-callout').className = 'callout ' + (adv > 0 ? 'green' : 'orange');
+  $('opp-callout').innerHTML = adv > 0
+    ? `<strong>At 10 years, the renter is ahead by ${fmt(adv)}.</strong> The down payment and monthly savings compounding in the market outpace the buyer's equity accumulation at these assumptions.`
+    : `<strong>At 10 years, the buyer is ahead by ${fmt(Math.abs(adv))}.</strong> Home appreciation and equity build outpace the renter's investment portfolio at these assumptions.`;
+
+  if (oppChart) oppChart.destroy();
+  oppChart = new Chart($('opp-chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Renter (invest the difference)', data: rentLine, borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3, pointRadius: 0 },
+        { label: 'Buyer (home equity)', data: buyLine, borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.3, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { weight: 700, size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.raw) } } },
+      scales: {
+        y: { ticks: { callback: v => fmtK(v) }, grid: { color: '#1E2A3C' } },
+        x: { ticks: { maxTicksLimit: 10 }, grid: { display: false } }
+      }
+    }
+  });
+  sendHeight();
+}
+
+['opp-dp','opp-mort','opp-rent','opp-appr','opp-inv','opp-rg','opp-hp'].forEach(id => {
+  $(id).addEventListener('input', calcOpp);
+});
+calcOpp();
+
+// ==================== 4. LOCK-IN CALCULATOR ====================
+let lockChart = null;
+function calcLock() {
+  const curRate = +$('lock-cur').value / 100;
+  const curBal = +$('lock-bal').value;
+  const curRem = +$('lock-rem').value;
+  const newRate = +$('lock-new').value / 100;
+  const newAmt = +$('lock-amt').value;
+  const newTerm = +$('lock-term').value;
+
+  $('lock-cur-v').textContent = pct(curRate*100);
+  $('lock-bal-v').textContent = fmt(curBal);
+  $('lock-rem-v').textContent = curRem;
+  $('lock-new-v').textContent = pct(newRate*100);
+  $('lock-amt-v').textContent = fmt(newAmt);
+  $('lock-term-v').textContent = newTerm;
+
+  const curMP = mortgagePayment(curBal, curRate, curRem);
+  const newMP = mortgagePayment(newAmt, newRate, newTerm);
+  const moDiff = newMP - curMP;
+  const yrDiff = moDiff * 12;
+  const fiveYrDiff = moDiff * 60;
+
+  $('lock-mo').textContent = (moDiff > 0 ? '+' : '') + fmt(moDiff);
+  $('lock-yr').textContent = (yrDiff > 0 ? '+' : '') + fmt(yrDiff);
+  $('lock-5yr').textContent = (fiveYrDiff > 0 ? '+' : '') + fmt(fiveYrDiff);
+
+  $('lock-callout').className = 'callout ' + (moDiff > 300 ? 'red' : moDiff > 0 ? 'orange' : 'green');
+  $('lock-callout').innerHTML = moDiff > 0
+    ? `<strong>Moving costs an extra ${fmt(moDiff)}/month.</strong> Over 5 years, that's ${fmt(fiveYrDiff)} in additional payments — a career tax that doesn't show up in any compensation negotiation. Factor this number into any relocation decision.`
+    : `<strong>The new mortgage is cheaper by ${fmt(Math.abs(moDiff))}/month.</strong> Moving would reduce your housing cost. The rate differential works in your favor.`;
+
+  // Cumulative difference chart
+  const labels = [], cumData = [];
+  let cum = 0;
+  for (let y = 1; y <= 10; y++) {
+    labels.push('Year ' + y);
+    cum += yrDiff;
+    cumData.push(cum);
+  }
+
+  if (lockChart) lockChart.destroy();
+  lockChart = new Chart($('lock-chart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'Cumulative extra cost', data: cumData, backgroundColor: cumData.map(v => v > 0 ? 'rgba(239,68,68,0.7)' : 'rgba(34,197,94,0.7)'), borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.raw) } } },
+      scales: {
+        y: { ticks: { callback: v => fmtK(v) }, grid: { color: '#1E2A3C' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+  sendHeight();
+}
+
+['lock-cur','lock-bal','lock-rem','lock-new','lock-amt','lock-term'].forEach(id => {
+  $(id).addEventListener('input', calcLock);
+});
+calcLock();
+
+// ==================== 5. MARKET COMPARISON ====================
+const METRO_DATA = [
+  { city: 'San Jose, CA', price: 1400000, rent: 3200 },
+  { city: 'San Francisco, CA', price: 1250000, rent: 3100 },
+  { city: 'Los Angeles, CA', price: 950000, rent: 2700 },
+  { city: 'San Diego, CA', price: 900000, rent: 2600 },
+  { city: 'Seattle, WA', price: 820000, rent: 2500 },
+  { city: 'New York, NY', price: 780000, rent: 2800 },
+  { city: 'Boston, MA', price: 750000, rent: 2700 },
+  { city: 'Denver, CO', price: 580000, rent: 2100 },
+  { city: 'Portland, OR', price: 530000, rent: 1900 },
+  { city: 'Austin, TX', price: 480000, rent: 1800 },
+  { city: 'Washington, DC', price: 570000, rent: 2200 },
+  { city: 'Miami, FL', price: 520000, rent: 2400 },
+  { city: 'Nashville, TN', price: 440000, rent: 1800 },
+  { city: 'Salt Lake City, UT', price: 520000, rent: 1700 },
+  { city: 'Chicago, IL', price: 340000, rent: 1700 },
+  { city: 'Atlanta, GA', price: 380000, rent: 1700 },
+  { city: 'Dallas, TX', price: 380000, rent: 1600 },
+  { city: 'Raleigh, NC', price: 420000, rent: 1700 },
+  { city: 'Phoenix, AZ', price: 410000, rent: 1600 },
+  { city: 'Minneapolis, MN', price: 350000, rent: 1500 }
+];
+
+function buildMktTable() {
+  const body = $('mkt-body');
+  body.innerHTML = '';
+  const sorted = [...METRO_DATA].sort((a, b) => {
+    const rA = a.price / (a.rent * 12);
+    const rB = b.price / (b.rent * 12);
+    return rB - rA;
+  });
+  sorted.forEach(m => {
+    const ratio = m.price / (m.rent * 12);
+    let signal, cls;
+    if (ratio >= 20) { signal = 'Rent favored'; cls = 'rent'; }
+    else if (ratio >= 15) { signal = 'Depends on hold'; cls = 'toss'; }
+    else { signal = 'Buy favored'; cls = 'buy'; }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${m.city}</strong></td><td>${fmt(m.price)}</td><td>${fmt(m.rent)}</td><td>${ratio.toFixed(1)}x</td><td><span class="signal-pill ${cls}">${signal}</span></td>`;
+    body.appendChild(tr);
+  });
+}
+buildMktTable();
+
+// ==================== 6. LEVERAGE ANALYZER ====================
+let levChart = null;
+function calcLev() {
+  const price = +$('lev-price').value;
+  const downPct = +$('lev-down').value / 100;
+  const rate = +$('lev-rate').value / 100;
+  const income = +$('lev-income').value;
+  const expPct = +$('lev-exp').value / 100;
+  const appr = +$('lev-appr').value / 100;
+  const hold = +$('lev-hold').value;
+  const mktReturn = +$('lev-mkt').value / 100;
+
+  $('lev-price-v').textContent = fmt(price);
+  $('lev-down-v').textContent = pct(downPct*100,0);
+  $('lev-rate-v').textContent = pct(rate*100);
+  $('lev-income-v').textContent = fmt(income);
+  $('lev-exp-v').textContent = pct(expPct*100,0);
+  $('lev-appr-v').textContent = pct(appr*100);
+  $('lev-hold-v').textContent = hold;
+  $('lev-mkt-v').textContent = pct(mktReturn*100);
+
+  const dp = price * downPct;
+  const loan = price - dp;
+  const mp = mortgagePayment(loan, rate, 30);
+  const grossRent = income * 12;
+  const expenses = grossRent * expPct;
+  const noi = grossRent - expenses;
+  const debtService = mp * 12;
+  const cashFlow = noi - debtService;
+  const moCF = cashFlow / 12;
+  const coc = (cashFlow / dp) * 100;
+
+  // Total ROI after hold
+  const futureVal = price * Math.pow(1 + appr, hold);
+  const totalCashFlow = cashFlow * hold;
+  const totalReturn = (futureVal - price) + totalCashFlow;
+  const leveragedROI = (totalReturn / dp) * 100;
+
+  // Market alternative
+  const mktAlt = dp * Math.pow(1 + mktReturn, hold);
+  const mktROI = ((mktAlt - dp) / dp) * 100;
+
+  $('lev-coc').textContent = pct(coc);
+  $('lev-roi').textContent = pct(leveragedROI, 0);
+  $('lev-alt').textContent = pct(mktROI, 0);
+  $('lev-cf').textContent = (moCF >= 0 ? '+' : '') + fmt(moCF) + '/mo';
+
+  const winner = leveragedROI > mktROI ? 'property' : 'market';
+  $('lev-callout').className = 'callout ' + (winner === 'property' ? 'green' : 'orange');
+  $('lev-callout').innerHTML = winner === 'property'
+    ? `<strong>The investment property wins at these assumptions.</strong> Leveraged ROI of ${pct(leveragedROI,0)} beats the market alternative of ${pct(mktROI,0)} over ${hold} years. Cash-on-cash return is ${pct(coc)}, with monthly cash flow of ${fmt(moCF)}.`
+    : `<strong>The market alternative wins at these assumptions.</strong> Putting ${fmt(dp)} in a diversified portfolio at ${pct(mktReturn*100)} returns ${pct(mktROI,0)} vs. the property's ${pct(leveragedROI,0)}. The property carries operational risk the index fund doesn't.`;
+
+  // Chart: property vs market over time
+  const labels = [], propLine = [], mktLine = [];
+  for (let y = 1; y <= hold; y++) {
+    labels.push('Year ' + y);
+    const fv = price * Math.pow(1 + appr, y);
+    const tcf = cashFlow * y;
+    propLine.push(fv - price + tcf + dp);
+    mktLine.push(dp * Math.pow(1 + mktReturn, y));
+  }
+
+  if (levChart) levChart.destroy();
+  levChart = new Chart($('lev-chart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Rental Property (equity + cash flow)', data: propLine, borderColor: '#FFD81D', backgroundColor: 'rgba(255,216,29,0.1)', fill: true, tension: 0.3, pointRadius: 0 },
+        { label: 'Market Alternative', data: mktLine, borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { weight: 700, size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.raw) } } },
+      scales: {
+        y: { ticks: { callback: v => fmtK(v) }, grid: { color: '#1E2A3C' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+  sendHeight();
+}
+
+['lev-price','lev-down','lev-rate','lev-income','lev-exp','lev-appr','lev-hold','lev-mkt'].forEach(id => {
+  $(id).addEventListener('input', calcLev);
+});
+calcLev();
+
+// ==================== 7. INVESTMENT PROPERTY SCREENER (DECISION TREE) ====================
+const DT_NODES = {
+  start: {
+    type: 'start', label: 'START HERE',
+    title: 'Should you buy an investment property?',
+    body: 'Walk through the questions below. Answer honestly — the tree is designed to screen out the scenarios where buying a rental property is the wrong move right now.',
+    options: [{ text: 'Begin screening →', next: 'q1' }]
+  },
+  q1: {
+    type: 'path', label: 'LIQUIDITY CHECK',
+    title: 'Do you have 6+ months of expenses in a liquid emergency fund separate from the down payment?',
+    body: 'The down payment cannot double as your emergency reserve. If a tenant leaves or the roof fails, you need cash on hand without touching retirement accounts.',
+    options: [
+      { text: 'Yes, fund is separate', next: 'q2' },
+      { text: 'No, it overlaps', next: 'no-liquidity' }
+    ]
+  },
+  'no-liquidity': {
+    type: 'leaf', label: 'RECOMMENDATION',
+    title: 'Build the emergency fund first.',
+    body: 'Investment properties carry cash flow risk. A vacancy, major repair, or bad tenant can cost $10K–$30K in a hurry. Without a separate emergency fund, one setback can cascade into selling the property at a loss or raiding retirement accounts. Build the fund, then revisit this tree.'
+  },
+  q2: {
+    type: 'path', label: 'DEBT CHECK',
+    title: 'Is all your high-interest debt (above 6%) paid off?',
+    body: 'Rental property returns typically run 6–12% on a good deal. Carrying debt at 8–22% (credit cards, personal loans) while leveraging into real estate is paying more to borrow than you earn on the asset.',
+    options: [
+      { text: 'Yes, debt is clear', next: 'q3' },
+      { text: 'No, still carrying high-rate debt', next: 'no-debt' }
+    ]
+  },
+  'no-debt': {
+    type: 'leaf', label: 'RECOMMENDATION',
+    title: 'Pay off the high-interest debt first.',
+    body: 'The guaranteed return from eliminating 8–22% interest outperforms the expected return on most rental properties, especially on a risk-adjusted basis. Clear the debt, then revisit.'
+  },
+  q3: {
+    type: 'path', label: 'INCOME STABILITY',
+    title: 'Do you have stable income for the next 2+ years?',
+    body: 'Lenders stress-test you. The market won\'t. If your comp structure is heavily weighted toward variable commissions and you\'re between cycles, leveraging into a second property amplifies downside risk.',
+    options: [
+      { text: 'Yes, income is stable', next: 'q4' },
+      { text: 'Uncertain or transitioning', next: 'no-income' }
+    ]
+  },
+  'no-income': {
+    type: 'leaf', label: 'RECOMMENDATION',
+    title: 'Stabilize income first.',
+    body: 'An investment property with a mortgage is a fixed obligation against variable income. If commissions dip and the property has a vacancy, you\'re covering two mortgages from a smaller paycheck. Wait until your income trajectory is clear for at least 12–18 months.'
+  },
+  q4: {
+    type: 'decision', label: 'MARKET & RETURNS',
+    title: 'Can you find a property with 6%+ cash-on-cash return in your target market?',
+    body: 'Run the numbers in the Leverage Analyzer tab. At current rates (7%+), many markets produce negative or near-zero cash flow. If the property doesn\'t cash flow positive from day one, you\'re speculating on appreciation — which is fine if you know that, but it\'s a different strategy than investing for income.',
+    options: [
+      { text: 'Yes, 6%+ CoC is achievable', next: 'q5' },
+      { text: 'No, returns are thin', next: 'no-returns' }
+    ]
+  },
+  'no-returns': {
+    type: 'leaf', label: 'RECOMMENDATION',
+    title: 'The math doesn\'t work at current rates in your market.',
+    body: 'When cash-on-cash returns are below 6%, the risk-adjusted return on a rental property often loses to a diversified portfolio. Consider REITs or real estate syndications if you want real estate exposure without the operational burden and illiquidity. Or wait for rates to come down and revisit.'
+  },
+  q5: {
+    type: 'decision', label: 'OPERATIONAL CAPACITY',
+    title: 'Are you prepared to manage or hire management for the property?',
+    body: 'Rental properties are not passive. Tenant screening, maintenance calls, lease enforcement, bookkeeping, and tax reporting require time or money. Property management typically costs 8–10% of rent, which eats directly into cash flow.',
+    options: [
+      { text: 'Yes, I have the capacity or budget', next: 'yes-buy' },
+      { text: 'Not sure I want the operational burden', next: 'no-ops' }
+    ]
+  },
+  'no-ops': {
+    type: 'leaf', label: 'RECOMMENDATION',
+    title: 'Consider passive real estate exposure instead.',
+    body: 'REITs, real estate syndications, or crowdfunding platforms give you real estate returns without tenant calls at 11 PM. The yields are typically lower than direct ownership, but the operational cost is zero. If you don\'t want to be a landlord, don\'t become one.'
+  },
+  'yes-buy': {
+    type: 'leaf', label: 'GREEN LIGHT',
+    title: 'The screening says: proceed with diligence.',
+    body: 'You have the liquidity, the debt position, the income stability, the market math, and the operational capacity. The next step is deep diligence on a specific property. Run it through the Leverage Analyzer with real numbers — not pro forma assumptions from a listing agent. And remember: the best time to walk away from a deal is before you close.'
+  }
+};
+
+let dtPath = ['start'];
+function renderDT() {
+  const container = $('dt-container');
+  container.innerHTML = '';
+  dtPath.forEach((nodeId, i) => {
+    const node = DT_NODES[nodeId];
+    if (!node) return;
+    const div = document.createElement('div');
+    div.className = 'dt-node ' + node.type;
+    let html = `<div class="dt-label">${node.label}</div><h4>${node.title}</h4><p>${node.body}</p>`;
+    if (node.options && i === dtPath.length - 1) {
+      html += '<div class="dt-options">';
+      node.options.forEach(o => {
+        html += `<button class="dt-btn" data-next="${o.next}">${o.text}</button>`;
+      });
+      html += '</div>';
+    }
+    div.innerHTML = html;
+    container.appendChild(div);
+  });
+  container.querySelectorAll('.dt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dtPath.push(btn.dataset.next);
+      renderDT();
+      sendHeight();
+    });
+  });
+}
+renderDT();
+
+// ==================== 8. AI TWIN ====================
+const AVATAR_B64 = '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';
+document.getElementById('twin-avatar-img').src = 'data:image/jpeg;base64,' + AVATAR_B64;
+
+const lessonFAQ = [
+  {
+    keys: ['should i buy', 'buy or rent', 'rent or buy', 'should i rent', 'buy right now'],
+    answer: `There's no universal answer, and anyone who gives you one without seeing your numbers is selling something.\n\n**The decision depends on five variables:**\n\n1. **Hold period** — how long you'll stay. Under 5 years, renting wins in almost every market. Between 5 and 7, it's a coin flip in most high-cost metros at current rates. Past 7, buying starts to pencil out in markets with decent appreciation.\n\n2. **Local price-to-rent ratio** — if the ratio in your metro is above 20 (San Francisco, San Jose, New York), renting is almost always cheaper on a monthly basis. Below 15 (Raleigh, Dallas, Chicago), buying pencils out faster.\n\n3. **Mortgage rate** — at 3.5%, buying was one of the best financial moves available. At 6.8%, the breakeven stretches deep into the second decade in many markets. The rate alone changes the answer.\n\n4. **Career mobility** — strategic tech sellers change companies every 2 to 4 years on average. Selling a home inside that window means eating 5–6% in transaction costs that wipe out any equity you built.\n\n5. **Opportunity cost** — a $200K down payment earning 8–10% in a diversified portfolio may build more net worth than the same $200K locked in a house appreciating at 3–4%.\n\nRun the Rent vs. Buy Calculator tab with your actual numbers. The breakeven year will give you a clear signal.`
+  },
+  {
+    keys: ['true cost', 'total cost', 'hidden cost', 'how much does it really cost', 'iceberg'],
+    answer: `The sticker price is what everyone fixates on. The number that matters is total cost of ownership over your hold period.\n\n**Here's what a $650,000 home actually costs at 6.8%:**\n\n- **Down payment:** $130,000 (20%)\n- **Mortgage interest over 30 years:** roughly $620,000\n- **Property taxes** (1.1% annually): ~$214,500 over 30 years\n- **Insurance:** ~$72,000 over 30 years\n- **Maintenance** (1% of value/year): ~$195,000 over 30 years\n- **Transaction costs** (buying + selling): ~$55,000\n\nTotal: approximately **$1.29 million** — roughly **2x the purchase price**.\n\nEven over a 10-year hold, the hidden costs (interest, taxes, insurance, maintenance, transaction fees) often exceed the down payment.\n\nRenters don't escape costs, but renters know their exact housing cost every month, and the difference between rent and a comparable mortgage payment can be deployed into assets that compound.\n\nThe True Cost tab will run these numbers for your specific situation. The gap between sticker price and total cost is almost always larger than people expect.`
+  },
+  {
+    keys: ['lock-in', 'locked in', 'trapped', 'golden handcuffs', 'moving cost', 'rate lock'],
+    answer: `The lock-in effect is the structural problem nobody solved: existing homeowners sitting on sub-4% mortgages from 2020 and 2021 are refusing to sell. The inventory that would normally turn over every 5 to 7 years is stuck.\n\n**For strategic sellers who already own, this creates a career tax.**\n\nMoving to a new city for a better role means trading your 3.2% mortgage for a 6.8% mortgage. On the same home value, that can mean $1,500 or more per month in additional cost. Over 5 years, that's $90,000+ in extra payments that don't show up in any compensation negotiation.\n\n**Two ways to think about it:**\n\n1. **Calculate the lock-in cost explicitly.** Use the Lock-In Calculator tab. Input your current rate and a new-market rate. See the monthly, annual, and 5-year cost of moving. That number should be part of any career decision that involves relocation.\n\n2. **Factor it into compensation negotiation.** If you're being recruited and moving costs you $1,500/month in rate differential, that's $18,000/year in after-tax income you need to replace. The new role needs to be worth that premium on top of whatever other calculus you're running.\n\nThe lock-in effect doesn't mean you should never move. It means you should know the true cost and negotiate accordingly.`
+  },
+  {
+    keys: ['when does buying win', 'when buy wins', 'advantage of buying', 'should i own'],
+    answer: `Buying wins when three things converge:\n\n**1. Long hold period.** Seven years minimum, ten to be safe. Every rent-vs-buy model shows the same pattern: buying is a losing proposition under 5 years in almost every market, and a coin flip between 5 and 7 in most high-cost metros at current rates.\n\n**2. Strong local appreciation.** Markets with job growth, population influx, and constrained supply tend to appreciate faster. Buying in a market with 4%+ annual appreciation is fundamentally different from buying in a market growing at 1–2%.\n\n**3. Reasonable mortgage rate.** At 3.5%, buying pencils out within 5 to 7 years in most markets. At 6.8%, the breakeven stretches past a decade in many metros. The rate environment determines whether the leverage works for you or against you.\n\n**Buying also wins when the lifestyle value transcends the math.** The neighborhood, the school district, the stability of knowing you can't be displaced — these are legitimate factors. Financial optimization is one input, not the whole framework.\n\n**And buying wins on leverage math when rates are reasonable.** A home is the one asset class where a bank will lend you 80% of the purchase price at a fixed rate for 30 years with no margin calls. That leverage amplifies returns in a rising market. The problem is that it amplifies losses in a falling one too.`
+  },
+  {
+    keys: ['rental property', 'investment property', 'should i buy rental', 'landlord', 'cash flow'],
+    answer: `Buying a rental property is a capital allocation decision, not a lifestyle decision. The questions are: what's the cash-on-cash return, what's the total return, and is your capital better served here or in the market?\n\n**The math at current rates is challenging.** At 7%+ mortgage rates, many rental properties produce negative or near-zero cash flow. If the property doesn't cash flow positive from day one, you're speculating on appreciation — which is a valid strategy if you know that, but it's a different bet than investing for income.\n\n**Five things to screen for before buying:**\n\n1. **Separate emergency fund** — the down payment can't double as your reserve\n2. **No high-interest debt** — guaranteed 8–22% savings beats speculative 6–12% returns\n3. **Stable income** — a fixed obligation against variable commissions amplifies downside risk\n4. **6%+ cash-on-cash return** — below this, the risk-adjusted return often loses to index funds\n5. **Operational capacity** — property management costs 8–10% of rent, eating into cash flow\n\nThe Investment Property Screener tab walks through this decision tree. The Leverage Analyzer lets you model specific properties against a market alternative. Run both before making any commitments.\n\nIf the operational burden or illiquidity concerns you, consider REITs or real estate syndications for passive exposure to real estate returns.`
+  },
+  {
+    keys: ['price-to-rent', 'price to rent', 'ratio', 'what ratio', 'market ratio'],
+    answer: `The price-to-rent ratio divides the median home price by the annual rent for a comparable property. It tells you whether buying or renting is cheaper on a monthly basis in a given metro.\n\n**How to read it:**\n\n- **Below 15** → Buying is relatively affordable. Monthly ownership costs are comparable to rent. The breakeven year is short. Markets like Raleigh, Dallas, and Chicago tend to fall here.\n\n- **15 to 20** → Gray zone. The answer depends on your hold period, rate, and appreciation assumptions. Run the Rent vs. Buy Calculator with your specific numbers.\n\n- **Above 20** → Renting is almost always cheaper on a monthly basis. The breakeven for buying pushes deep into the second decade. Markets like San Francisco (30–40x), San Jose, and New York sit here.\n\n**Why it matters for strategic sellers:**\n\nIf you're earning $300K+ in a market with a 35x price-to-rent ratio, the math strongly favors renting and investing the difference. The delta between rent and a comparable mortgage payment can compound to six figures over a decade in the market.\n\nIf you're in a 14x market, buying pencils out quickly, and the leverage amplifies modest appreciation into solid equity growth.\n\nThe Market Comparison tab has data for the twenty metros where strategic tech sellers cluster. Run your city before you run your personal numbers.`
+  }
+];
+
+function findAnswer(q){
+  const lower = q.toLowerCase();
+  for (const item of lessonFAQ){
+    if (item.keys.some(k => lower.includes(k))) return item.answer;
+  }
+  return null;
+}
+
+function escapeHTML(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderMarkdownLite(s){
+  s = escapeHTML(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return s.replace(/\n/g, '<br>');
+}
+
+function addMessage(role, text){
+  const wrap = $('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  if (role === 'twin'){
+    d.innerHTML = `<div class="msg-meta">AI TWIN</div>${renderMarkdownLite(text)}`;
+  } else {
+    d.textContent = text;
+  }
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function addClaudeHandoff(question){
+  const wrap = $('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg twin';
+  const claudeURL = 'https://claude.ai/new?q=' + encodeURIComponent(
+    "I'm working through a lesson from The Purposeful Performer called 'Own, Rent, or Leverage: The Real Estate Playbook for High Earners.' " +
+    "It covers the rent-vs-buy decision framework, true cost of ownership, opportunity cost analysis, lock-in effects, price-to-rent ratios, investment property analysis, and how real estate fits into a strategic tech seller's financial architecture. " +
+    "My question: " + question
+  );
+  d.innerHTML = `<div class="msg-meta">AI TWIN</div>
+    That question goes a little beyond what this Twin is scoped to answer (Lesson 7 only).
+    <br><br>
+    Want a deeper answer? I'll hand you off to Claude with the lesson context pre-loaded.
+    <br><br>
+    <a href="${claudeURL}" target="_blank" rel="noopener" style="display:inline-block;background:var(--gold);color:var(--dark);padding:10px 16px;border-radius:8px;font-weight:700;text-decoration:none;">Ask Claude →</a>
+    <span style="font-size:12px;color:var(--muted);margin-left:8px;">(free, sign-in required)</span>`;
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function submitChat(q){
+  if (!q || !q.trim()) return;
+  addMessage('user', q.trim());
+  $('chat-input').value = '';
+  setTimeout(() => {
+    const ans = findAnswer(q);
+    if (ans) addMessage('twin', ans);
+    else addClaudeHandoff(q);
+  }, 400);
+}
+
+$('chat-send').addEventListener('click', () => {
+  submitChat($('chat-input').value);
+});
+$('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitChat(e.target.value);
+});
+document.querySelectorAll('#suggested button').forEach(b => {
+  b.addEventListener('click', () => submitChat(b.textContent));
+});
+
+// ==================== POST-MESSAGE HEIGHT ====================
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
+
+</script>
+</body>
+</html>
